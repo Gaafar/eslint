@@ -79,7 +79,8 @@
     "strip-json-comments": "^3.0.1",
     "table": "^5.2.3",
     "text-table": "^0.2.0",
-    "v8-compile-cache": "^2.0.3"
+    "v8-compile-cache": "^2.0.3",
+    "workerpool": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",

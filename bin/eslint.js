@@ -57,26 +57,35 @@ process.once("uncaughtException", err => {
     process.exitCode = 2;
 });
 
-if (useStdIn) {
 
-    /*
-     * Note: `process.stdin.fd` is not used here due to https://github.com/nodejs/node/issues/7439.
-     * Accessing the `process.stdin` property seems to modify the behavior of file descriptor 0, resulting
-     * in an error when stdin is piped in asynchronously.
-     */
-    const STDIN_FILE_DESCRIPTOR = 0;
+// eslint-disable-next-line require-jsdoc
+async function main() {
+    if (useStdIn) {
 
-    process.exitCode = cli.execute(process.argv, fs.readFileSync(STDIN_FILE_DESCRIPTOR, "utf8"));
-} else if (init) {
-    const configInit = require("../lib/init/config-initializer");
+        /*
+         * Note: `process.stdin.fd` is not used here due to https://github.com/nodejs/node/issues/7439.
+         * Accessing the `process.stdin` property seems to modify the behavior of file descriptor 0, resulting
+         * in an error when stdin is piped in asynchronously.
+         */
+        const STDIN_FILE_DESCRIPTOR = 0;
 
-    configInit.initializeConfig().then(() => {
-        process.exitCode = 0;
-    }).catch(err => {
-        process.exitCode = 1;
-        console.error(err.message);
-        console.error(err.stack);
-    });
-} else {
-    process.exitCode = cli.execute(process.argv);
+        process.exitCode = await cli.execute(process.argv, fs.readFileSync(STDIN_FILE_DESCRIPTOR, "utf8"));
+    } else if (init) {
+        const configInit = require("../lib/init/config-initializer");
+
+        configInit.initializeConfig().then(() => {
+            process.exitCode = 0;
+        }).catch(err => {
+            process.exitCode = 1;
+            console.error(err.message);
+            console.error(err.stack);
+        });
+    } else {
+        process.exitCode = await cli.execute(process.argv);
+    }
 }
+
+main().catch(err => {
+    console.log("exited with error", err);
+    process.exitCode = 1;
+});
